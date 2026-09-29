@@ -52,14 +52,19 @@ async function ensureModeRichMenu(client, imageBuffer, options = {}) {
   if (!richMenuId) {
     const response = await client.createRichMenu(createRichMenuRequest());
     richMenuId = response.richMenuId;
-    const imageClient = options.imageClient ?? client;
+    created = true;
+  }
+
+  const imageClient = options.imageClient ?? client;
+  try {
     await imageClient.setRichMenuImage(
       richMenuId,
       new Blob([imageBuffer], { type: RICH_MENU_IMAGE_TYPE })
     );
-    created = true;
+  } catch (error) {
+    const details = `${error.message ?? ""} ${error.body ?? ""}`;
+    if (!details.includes("already been uploaded")) throw error;
   }
-
   await client.setDefaultRichMenu(richMenuId);
   return { richMenuId, created };
 }

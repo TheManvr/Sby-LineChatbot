@@ -144,7 +144,9 @@ def main():
         footer_font,
         (8, 42, 97, 255),
     )
-    canvas.convert("RGB").save(OUTPUT, format="PNG", optimize=True)
+    # LINE's rich-menu image upload limit is 1 MB; indexed PNG keeps the artwork crisp.
+    optimized = canvas.convert("RGB").quantize(colors=256, method=Image.Quantize.MEDIANCUT)
+    optimized.save(OUTPUT, format="PNG", optimize=True)
     print(OUTPUT)
 
 
