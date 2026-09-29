@@ -1,4 +1,4 @@
-const RICH_MENU_NAME = "SBY Chatbot Modes v3";
+const RICH_MENU_NAME = "SBY Chatbot Modes v4";
 const RICH_MENU_IMAGE_TYPE = "image/png";
 
 const MODE_MENU_ACTIONS = [
