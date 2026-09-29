@@ -58,6 +58,37 @@ function createServer({
     });
   }
 
+  async function replyModePrompt(event, text) {
+    const userId = sourceIdFor(event);
+    if (event.source?.type === "user" && userId) {
+      void client
+        .showLoadingAnimation({ chatId: userId, loadingSeconds: 5 })
+        .catch((error) => {
+          logger.info("mode_loading_indicator_failed", {
+            errorCode: error.code ?? "LINE_LOADING_ERROR",
+          });
+        });
+    }
+
+    try {
+      await reply(event.replyToken, text);
+    } catch (error) {
+      if (!userId) throw error;
+      try {
+        await client.pushMessage({
+          to: userId,
+          messages: [textMessage(text)],
+        });
+        logger.info("mode_reply_fallback_sent");
+      } catch (fallbackError) {
+        logger.error("mode_reply_failed", {
+          errorCode: fallbackError.code ?? error.code ?? "LINE_REPLY_ERROR",
+        });
+        throw error;
+      }
+    }
+  }
+
   function modeConfirmation(mode) {
     if (mode === CHAT_MODES.GENERAL) {
       return GENERAL_MODE_PROMPT;
@@ -73,7 +104,7 @@ function createServer({
       ? event.timestamp
       : Date.now();
     modeStore.set(sourceKeyFor(event), mode, eventTimestamp);
-    await reply(event.replyToken, modeConfirmation(mode));
+    await replyModePrompt(event, modeConfirmation(mode));
   }
 
   async function handleAdminCommand(event, text) {
