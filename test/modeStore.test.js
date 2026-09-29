@@ -24,3 +24,10 @@ test("stores a mode per user and defaults to general", () => {
   assert.equal(store.get("user-a", 1501), CHAT_MODES.GENERAL);
 });
 
+test("does not let an older event overwrite the latest mode", () => {
+  const store = createModeStore({ ttlMs: 1000 });
+  store.set("user-a", CHAT_MODES.ADMIN, 2000);
+  store.set("user-a", CHAT_MODES.GENERAL, 1000);
+  assert.equal(store.get("user-a", 2001), CHAT_MODES.ADMIN);
+});
+

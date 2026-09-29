@@ -57,7 +57,11 @@ function createModeStore({ ttlMs = 24 * 60 * 60 * 1000 } = {}) {
       if (!Object.values(CHAT_MODES).includes(mode)) {
         throw new Error(`Unknown chat mode: ${mode}`);
       }
-      records.set(key, { mode, expiresAt: now + ttlMs });
+      const existing = records.get(key);
+      if (existing && now < existing.updatedAt) {
+        return existing.mode;
+      }
+      records.set(key, { mode, expiresAt: now + ttlMs, updatedAt: now });
       return mode;
     },
   };

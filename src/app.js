@@ -69,7 +69,10 @@ function createServer({
   }
 
   async function setMode(event, mode) {
-    modeStore.set(sourceKeyFor(event), mode);
+    const eventTimestamp = Number.isFinite(event.timestamp)
+      ? event.timestamp
+      : Date.now();
+    modeStore.set(sourceKeyFor(event), mode, eventTimestamp);
     await reply(event.replyToken, modeConfirmation(mode));
   }
 
