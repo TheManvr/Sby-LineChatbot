@@ -22,7 +22,7 @@ function sourceIdFor(event) {
 
 const ID_COMMANDS = new Set(["/my-id", "รหัสฉัน"]);
 const GENERAL_MODE_PROMPT =
-  "💬 โหมดคำถามทั่วไป\n\nพิมพ์คำถามได้เลยครับ";
+  "💬 โหมดคำถามทั่วไป\n\n✏️ พิมพ์คำถามได้เลยครับ";
 const GENERAL_MODE_DISABLED =
   "โหมดคำถามทั่วไปยังอยู่ระหว่างการพัฒนาครับ ตอนนี้ยังไม่เปิดให้ AI ตอบคำถามทั่วไป";
 
@@ -63,9 +63,9 @@ function createServer({
       return GENERAL_MODE_PROMPT;
     }
     if (mode === CHAT_MODES.SCHOLARSHIP) {
-      return "🐘 โหมดทุนช้างเผือก\n\nพิมพ์คำถามได้เลยครับ";
+      return "🐘 โหมดทุนช้างเผือก\n\n✏️ พิมพ์คำถามได้เลยครับ";
     }
-    return "👨‍💼 โหมดติดต่อแอดมิน\n\nพิมพ์ข้อความได้เลยครับ";
+    return "👨‍💼 โหมดติดต่อแอดมิน\n\n✏️ พิมพ์ข้อความได้เลยครับ";
   }
 
   async function setMode(event, mode) {
