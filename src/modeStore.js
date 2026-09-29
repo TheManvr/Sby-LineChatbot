@@ -1,3 +1,6 @@
+const fs = require("node:fs");
+const path = require("node:path");
+
 const CHAT_MODES = Object.freeze({
   GENERAL: "general",
   SCHOLARSHIP: "scholarship",
@@ -40,14 +43,51 @@ function parseModePostback(data) {
   return Object.values(CHAT_MODES).includes(mode) ? mode : null;
 }
 
-function createModeStore({ ttlMs = 24 * 60 * 60 * 1000 } = {}) {
-  const records = new Map();
+function loadRecords(persistPath) {
+  if (!persistPath) return new Map();
+  try {
+    const parsed = JSON.parse(fs.readFileSync(persistPath, "utf8"));
+    return new Map(
+      Object.entries(parsed).filter(
+        ([, record]) =>
+          record &&
+          Object.values(CHAT_MODES).includes(record.mode) &&
+          Number.isFinite(record.expiresAt) &&
+          Number.isFinite(record.updatedAt)
+      )
+    );
+  } catch (error) {
+    if (error.code !== "ENOENT") {
+      console.warn(`Could not load mode store: ${error.message}`);
+    }
+    return new Map();
+  }
+}
+
+function persistRecords(records, persistPath) {
+  if (!persistPath) return;
+  fs.mkdirSync(path.dirname(persistPath), { recursive: true });
+  const temporaryPath = `${persistPath}.tmp`;
+  fs.writeFileSync(
+    temporaryPath,
+    JSON.stringify(Object.fromEntries(records)),
+    "utf8"
+  );
+  fs.renameSync(temporaryPath, persistPath);
+}
+
+function createModeStore({
+  ttlMs = 24 * 60 * 60 * 1000,
+  persistPath = null,
+} = {}) {
+  const records = loadRecords(persistPath);
 
   return {
     get(key, now = Date.now()) {
       const record = records.get(key);
       if (!record || record.expiresAt <= now) {
         records.delete(key);
+        persistRecords(records, persistPath);
         return CHAT_MODES.GENERAL;
       }
       record.expiresAt = now + ttlMs;
@@ -62,6 +102,7 @@ function createModeStore({ ttlMs = 24 * 60 * 60 * 1000 } = {}) {
         return existing.mode;
       }
       records.set(key, { mode, expiresAt: now + ttlMs, updatedAt: now });
+      persistRecords(records, persistPath);
       return mode;
     },
   };

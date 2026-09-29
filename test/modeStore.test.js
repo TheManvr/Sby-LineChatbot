@@ -1,4 +1,7 @@
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
 const test = require("node:test");
 const {
   CHAT_MODES,
@@ -29,5 +32,19 @@ test("does not let an older event overwrite the latest mode", () => {
   store.set("user-a", CHAT_MODES.ADMIN, 2000);
   store.set("user-a", CHAT_MODES.GENERAL, 1000);
   assert.equal(store.get("user-a", 2001), CHAT_MODES.ADMIN);
+});
+
+test("persists a selected mode across store instances", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "sby-mode-store-"));
+  const persistPath = path.join(directory, "modes.json");
+  try {
+    const firstStore = createModeStore({ persistPath, ttlMs: 1000 });
+    firstStore.set("user-a", CHAT_MODES.SCHOLARSHIP, 1000);
+
+    const secondStore = createModeStore({ persistPath, ttlMs: 1000 });
+    assert.equal(secondStore.get("user-a", 1500), CHAT_MODES.SCHOLARSHIP);
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
 });
 

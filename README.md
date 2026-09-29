@@ -35,11 +35,15 @@ OPENAI_API_KEY=ใส่ API key เดียวกับ CyberGuardBot
 OPENAI_MODEL=gpt-5.4-nano
 AI_REQUESTS_PER_HOUR=30
 ADMIN_USER_ID=LINE user ID ของแอดมิน
+# ไม่จำเป็นต้องตั้งค่า ระบบจะบันทึกโหมดผู้ใช้ไว้ที่ .runtime/modes.json
+# MODE_STORE_PATH=/path/to/modes.json
 ```
 
 ค่าเริ่มต้น `AI_ANALYSIS_ENABLED=false` ทำให้บอตตอบจากข้อมูลที่ตรวจทานแล้วได้ทันทีโดยไม่ต้องมี OpenAI key เมื่อกรอก `OPENAI_API_KEY` แล้วให้เปลี่ยนเป็น `AI_ANALYSIS_ENABLED=true` เพื่อเปิดการเรียบเรียงคำตอบด้วย API เดียวกับ CyberGuardBot ห้าม commit ไฟล์ `.env` หรือ secret ใด ๆ ขึ้น GitHub
 
 `GENERAL_MODE_ENABLED=false` เป็นค่าที่ตั้งไว้สำหรับโหมดคำถามทั่วไปในช่วงเริ่มต้น ระบบจะแจ้งผู้ใช้ว่าโหมดนี้ยังอยู่ระหว่างการพัฒนาและจะไม่ส่งข้อความไปหา AI หากเตรียมคลังข้อมูลคำถามทั่วไปเสร็จแล้วจึงเปลี่ยนเป็น `true`
+
+โหมดที่ผู้ใช้เลือกจะถูกเก็บด้วยคีย์ที่ผ่านการแฮชไว้ใน `.runtime/modes.json` เพื่อไม่ให้โหมดกลับเป็นคำถามทั่วไปเมื่อโปรเซสรีสตาร์ต หากผู้ให้บริการตั้งค่า filesystem แบบชั่วคราว สามารถกำหนด `MODE_STORE_PATH` ไปยังพื้นที่จัดเก็บถาวรได้
 
 ## โหมดเมนู 3 แบบ
 

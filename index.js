@@ -1,3 +1,4 @@
+const path = require("node:path");
 require("dotenv").config({ quiet: true });
 
 const { createServer } = require("./src/app");
@@ -26,7 +27,11 @@ const generalAnswerer = config.aiEnabled && config.generalModeEnabled
       model: config.openaiModel,
     })
   : null;
-const modeStore = createModeStore();
+const modeStore = createModeStore({
+  persistPath:
+    process.env.MODE_STORE_PATH ||
+    path.join(process.cwd(), ".runtime", "modes.json"),
+});
 const answerService = createAnswerService({
   aiAnswerer,
   aiEnabled: config.aiEnabled,
