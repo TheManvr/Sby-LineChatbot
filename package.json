@@ -1,0 +1,24 @@
+{
+  "name": "sby-line-chatbot",
+  "version": "1.0.0",
+  "description": "LINE chatbot for SBY school information, starting with the White Elephant Scholarship 2570",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "node --test",
+    "check:knowledge": "node scripts/validate-knowledge.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@line/bot-sdk": "^11.2.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "openai": "^7.15.0",
+    "zod": "^4.6.5"
+  }
+}
+
