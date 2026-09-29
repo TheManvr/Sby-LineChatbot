@@ -1,6 +1,6 @@
 # Rich Menu และการส่งต่อแอดมิน
 
-ไฟล์ภาพเมนูอยู่ที่ `public/rich-menu/sby-modes.png` และ action ของเมนูอยู่ใน `src/richMenu.js`:
+ไฟล์ภาพเมนูอยู่ที่ `public/rich-menu/sby-modes.jpg` และ action ของเมนูอยู่ใน `src/richMenu.js`:
 
 - `mode=general` — โหมดคำถามทั่วไป
 - `mode=scholarship` — โหมดทุนช้างเผือก

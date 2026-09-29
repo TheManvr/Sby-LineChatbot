@@ -10,14 +10,14 @@ const imagePath = path.join(
   "..",
   "public",
   "rich-menu",
-  "sby-modes.png"
+  "sby-modes.jpg"
 );
 const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
 
 async function main() {
   if (!token) throw new Error("LINE_CHANNEL_ACCESS_TOKEN is missing");
   if (!fs.existsSync(imagePath)) {
-    throw new Error("Rich menu image is missing: public/rich-menu/sby-modes.png");
+    throw new Error("Rich menu image is missing: public/rich-menu/sby-modes.jpg");
   }
 
   const client = new line.messagingApi.MessagingApiClient({
