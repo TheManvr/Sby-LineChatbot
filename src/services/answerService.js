@@ -6,6 +6,7 @@ const {
 
 const GREETINGS = new Set(["สวัสดี", "สวัสดีครับ", "หวัดดี", "hello", "hi"]);
 const HELP_WORDS = new Set(["ช่วยเหลือ", "help", "เมนู", "ถามอะไรได้บ้าง"]);
+const SHORT_PRICE_QUESTIONS = new Set(["ราคา", "เท่าไหร่", "กี่บาท", "ค่าใช้จ่าย"]);
 
 function appendSource(answer, topic) {
   return `${answer.trim()}\n\nอ้างอิง: ${topic.source.displayName}`;
@@ -34,6 +35,23 @@ function createAnswerService({
       if (!compactQuestion) return null;
       if (GREETINGS.has(compactQuestion)) return null;
       if (HELP_WORDS.has(compactQuestion)) return null;
+
+      if (SHORT_PRICE_QUESTIONS.has(compactQuestion)) {
+        return (
+          "❓ ต้องการถามราคาเรื่องไหนครับ?\n\n" +
+          "💳 ค่าสมัครสอบ: 150 บาท\n" +
+          "🐘 มูลค่าทุน: 6,000 บาทต่อปี\n\n" +
+          "ลองพิมพ์ “ค่าสมัครเท่าไหร่” หรือ “ทุนได้กี่บาท” ครับ"
+        );
+      }
+
+      if (compactQuestion.includes("อายุ")) {
+        return (
+          "📌 ประกาศทุนไม่ได้กำหนดเป็นอายุโดยตรง แต่กำหนดตามระดับชั้นครับ\n\n" +
+          "• ทุนระดับ ม.1: กำลังเรียน ป.4–ป.6\n" +
+          "• ทุนระดับ ม.4: กำลังเรียน ม.1–ม.3"
+        );
+      }
 
       let results = findRelevantEntries(question, knowledgeBase, { limit: 4 });
       const hasTopicAlias = matchesTopicAlias(question, knowledgeBase);

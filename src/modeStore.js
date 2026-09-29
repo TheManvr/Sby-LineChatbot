@@ -17,12 +17,21 @@ const MODE_BY_TEXT = new Map([
   ["1", CHAT_MODES.GENERAL],
   ["ทั่วไป", CHAT_MODES.GENERAL],
   ["คำถามทั่วไป", CHAT_MODES.GENERAL],
+  ["ถามทั่วไป", CHAT_MODES.GENERAL],
+  ["ถามเรื่องทั่วไป", CHAT_MODES.GENERAL],
+  ["เรื่องทั่วไป", CHAT_MODES.GENERAL],
   ["2", CHAT_MODES.SCHOLARSHIP],
   ["ทุน", CHAT_MODES.SCHOLARSHIP],
   ["ทุนช้างเผือก", CHAT_MODES.SCHOLARSHIP],
+  ["ถามทุน", CHAT_MODES.SCHOLARSHIP],
+  ["ถามเรื่องทุน", CHAT_MODES.SCHOLARSHIP],
+  ["ถามเรื่องทุนช้างเผือก", CHAT_MODES.SCHOLARSHIP],
+  ["เรื่องทุน", CHAT_MODES.SCHOLARSHIP],
   ["3", CHAT_MODES.ADMIN],
   ["แอดมิน", CHAT_MODES.ADMIN],
   ["ติดต่อแอดมิน", CHAT_MODES.ADMIN],
+  ["คุยกับแอดมิน", CHAT_MODES.ADMIN],
+  ["ถามแอดมิน", CHAT_MODES.ADMIN],
 ]);
 
 function normalizeSelection(value) {

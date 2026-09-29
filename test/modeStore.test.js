@@ -15,6 +15,8 @@ test("parses menu postbacks and text fallbacks", () => {
   assert.equal(parseModePostback("mode=scholarship"), CHAT_MODES.SCHOLARSHIP);
   assert.equal(parseModePostback("mode=admin"), CHAT_MODES.ADMIN);
   assert.equal(parseModeSelection("2"), CHAT_MODES.SCHOLARSHIP);
+  assert.equal(parseModeSelection("ถามเรื่องทั่วไป"), CHAT_MODES.GENERAL);
+  assert.equal(parseModeSelection("ถามเรื่องทุนช้างเผือก"), CHAT_MODES.SCHOLARSHIP);
   assert.equal(parseModeSelection("ติดต่อแอดมิน"), CHAT_MODES.ADMIN);
   assert.equal(parseModeSelection("คำถามที่ไม่ใช่เมนู"), null);
 });

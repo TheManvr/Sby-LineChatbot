@@ -25,6 +25,18 @@ test("answers a known question without AI", async () => {
   assert.match(answer, /อ้างอิง:/);
 });
 
+test("handles short price and age questions in scholarship mode", async () => {
+  const service = createAnswerService({
+    aiAnswerer: null,
+    aiEnabled: false,
+    knowledgeBase: loadKnowledgeBase(),
+    logger: silentLogger(),
+    rateLimiter: allowAllLimiter(),
+  });
+  assert.match(await service.answer("ราคา"), /ค่าสมัครสอบ: 150 บาท/);
+  assert.match(await service.answer("อายุเท่าไร"), /ทุนระดับ ม.1/);
+});
+
 test("stays silent for an out-of-scope question", async () => {
   const service = createAnswerService({
     aiAnswerer: null,
