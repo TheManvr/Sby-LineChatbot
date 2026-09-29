@@ -8,7 +8,8 @@
     "start": "node index.js",
     "dev": "node --watch index.js",
     "test": "node --test",
-    "check:knowledge": "node scripts/validate-knowledge.js"
+    "check:knowledge": "node scripts/validate-knowledge.js",
+    "menu:setup": "node scripts/setup-rich-menu.js"
   },
   "engines": {
     "node": ">=22"

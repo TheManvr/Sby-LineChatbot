@@ -6,6 +6,8 @@ const { loadKnowledgeBase } = require("./src/knowledge/loadKnowledgeBase");
 const { createLogger } = require("./src/logger");
 const { createRateLimiter } = require("./src/rateLimiter");
 const { createAnswerService } = require("./src/services/answerService");
+const { createGeneralAnswerer } = require("./src/services/generalAnswerer");
+const { createModeStore } = require("./src/modeStore");
 const { createOpenAIAnswerer } = require("./src/services/openaiAnswerer");
 
 const config = readConfig();
@@ -18,6 +20,13 @@ const aiAnswerer = config.aiEnabled
       model: config.openaiModel,
     })
   : null;
+const generalAnswerer = config.aiEnabled
+  ? createGeneralAnswerer({
+      apiKey: config.openaiApiKey,
+      model: config.openaiModel,
+    })
+  : null;
+const modeStore = createModeStore();
 const answerService = createAnswerService({
   aiAnswerer,
   aiEnabled: config.aiEnabled,
@@ -25,8 +34,15 @@ const answerService = createAnswerService({
   logger,
   rateLimiter,
 });
-
-const { server } = createServer({ answerService, config, knowledgeBase, logger });
+const { server } = createServer({
+  answerService,
+  config,
+  generalAnswerer,
+  knowledgeBase,
+  logger,
+  modeStore,
+  rateLimiter,
+});
 
 function shutdown(signal) {
   logger.info("server_stopping", { signal });

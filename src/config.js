@@ -33,6 +33,7 @@ function readConfig() {
     ),
     channelAccessToken,
     channelSecret,
+    adminUserId: process.env.ADMIN_USER_ID || null,
     openaiApiKey,
     openaiModel: process.env.OPENAI_MODEL || "gpt-5.4-nano",
     port: readPositiveInteger(process.env.PORT, 3000, 65535),

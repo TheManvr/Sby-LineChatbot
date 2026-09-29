@@ -6,6 +6,8 @@ LINE chatbot สำหรับโรงเรียนส่วนบุญโ�
 
 - ตอบคุณสมบัติ วันสมัคร ค่าสมัคร เลขบัญชี วันและเวลาสอบ วิชาสอบ จำนวนทุน เงื่อนไข GPAX เกียรติบัตร และวันประกาศผล
 - เงียบเมื่อคำถามไม่เกี่ยวกับทุนช้างเผือก เช่น ค่าเครื่องแบบหรือเรื่องทั่วไป เพื่อเปิดทางให้แอดมินตอบเอง
+- มีโหมดแชต 3 แบบ: คำถามทั่วไป, ทุนช้างเผือก และติดต่อแอดมิน
+- โหมดแอดมินส่ง ticket ไปยัง `ADMIN_USER_ID` และแอดมินตอบกลับด้วย `ตอบ TICKET_ID ข้อความ`
 - ใช้ OpenAI API และชื่อตัวแปร environment แบบเดียวกับ CyberGuardBot
 - หาก AI ใช้งานไม่ได้ ระบบยังตอบคำถามหลักจากข้อมูลที่ตรวจทานแล้วได้
 - ไม่บันทึกข้อความผู้ใช้ LINE user ID token หรือ secret ลง log
@@ -31,9 +33,30 @@ AI_ANALYSIS_ENABLED=false
 OPENAI_API_KEY=ใส่ API key เดียวกับ CyberGuardBot
 OPENAI_MODEL=gpt-5.4-nano
 AI_REQUESTS_PER_HOUR=30
+ADMIN_USER_ID=LINE user ID ของแอดมิน
 ```
 
 ค่าเริ่มต้น `AI_ANALYSIS_ENABLED=false` ทำให้บอตตอบจากข้อมูลที่ตรวจทานแล้วได้ทันทีโดยไม่ต้องมี OpenAI key เมื่อกรอก `OPENAI_API_KEY` แล้วให้เปลี่ยนเป็น `AI_ANALYSIS_ENABLED=true` เพื่อเปิดการเรียบเรียงคำตอบด้วย API เดียวกับ CyberGuardBot ห้าม commit ไฟล์ `.env` หรือ secret ใด ๆ ขึ้น GitHub
+
+## โหมดเมนู 3 แบบ
+
+Rich Menu ที่เตรียมไว้มี 3 ปุ่มและส่ง postback ดังนี้:
+
+| ปุ่ม | postback | การทำงาน |
+| --- | --- | --- |
+| คำถามทั่วไป | `mode=general` | เรียก AI ในบทบาทผู้ช่วยคำถามทั่วไปของโรงเรียน |
+| ทุนช้างเผือก | `mode=scholarship` | ใช้คลังข้อมูลทุนช้างเผือกและ AI แบบ grounded |
+| ติดต่อแอดมิน | `mode=admin` | ไม่เรียก AI ส่งข้อความเป็น ticket ให้แอดมิน |
+
+ผู้ใช้จะอยู่ในโหมดเดิมจนกดเมนูอื่น สามารถพิมพ์ `1`, `2`, `3` แทนปุ่มได้ด้วย การตั้งค่าเมนูใช้:
+
+```powershell
+npm run menu:setup
+```
+
+คำสั่งนี้ใช้ `LINE_CHANNEL_ACCESS_TOKEN` และตั้ง Rich Menu เป็นเมนูหลักของ Official Account
+
+ก่อนตั้ง `ADMIN_USER_ID` ให้ผู้ดูแลส่ง `/my-id` ให้บอต แล้วนำ LINE user ID ที่ได้รับมาใส่ใน Hostinger Environment Variables จากนั้น Redeploy
 
 ## รันในเครื่อง
 

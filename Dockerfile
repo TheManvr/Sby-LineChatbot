@@ -8,6 +8,7 @@ RUN npm ci --omit=dev
 COPY index.js ./
 COPY src ./src
 COPY data ./data
+COPY public ./public
 
 ENV NODE_ENV=production
 EXPOSE 3000
