@@ -7,6 +7,13 @@ const {
 const GREETINGS = new Set(["สวัสดี", "สวัสดีครับ", "หวัดดี", "hello", "hi"]);
 const HELP_WORDS = new Set(["ช่วยเหลือ", "help", "เมนู", "ถามอะไรได้บ้าง"]);
 const SHORT_PRICE_QUESTIONS = new Set(["ราคา", "เท่าไหร่", "กี่บาท", "ค่าใช้จ่าย"]);
+const UNCLEAR_QUESTION =
+  "🤔 ขออภัยครับ ผมยังไม่เข้าใจคำถาม\n\n" +
+  "ตอนนี้ผมช่วยตอบได้เฉพาะเรื่องทุนช้างเผือกครับ\n" +
+  "ลองถามเช่น\n" +
+  "• สมัครทุนวันไหน\n" +
+  "• ค่าสมัครเท่าไหร่\n" +
+  "• ทุนได้กี่บาท";
 
 function appendSource(answer, topic) {
   return `${answer.trim()}\n\nอ้างอิง: ${topic.source.displayName}`;
@@ -58,25 +65,26 @@ function createAnswerService({
       if (results.length === 0 && hasTopicAlias) {
         results = [{ entry: topic.entries[0], score: 1 }];
       }
-      if (results.length === 0) return null;
-
       if (!aiEnabled || !aiAnswerer) {
-        return fallbackAnswer(results, topic);
+        return results.length > 0 ? fallbackAnswer(results, topic) : UNCLEAR_QUESTION;
       }
 
       const rate = rateLimiter.check(sourceKey);
       if (!rate.allowed) {
         logger.info("ai_rate_limited");
-        return fallbackAnswer(results, topic);
+        return results.length > 0 ? fallbackAnswer(results, topic) : UNCLEAR_QUESTION;
       }
 
       try {
+        const sourceEntries = results.length > 0
+          ? results.map((result) => result.entry)
+          : topic.entries;
         const aiResult = await aiAnswerer({
-          entries: results.map((result) => result.entry),
+          entries: sourceEntries,
           question,
           topicTitle: topic.title,
         });
-        if (!aiResult.inScope) return null;
+        if (!aiResult.inScope) return UNCLEAR_QUESTION;
         logger.info("ai_answer_created", {
           entryCount: aiResult.usedEntryIds.length,
           model: aiResult.model,
@@ -86,7 +94,7 @@ function createAnswerService({
         logger.error("ai_answer_failed", {
           errorCode: error.code ?? "AI_ERROR",
         });
-        return fallbackAnswer(results, topic);
+        return results.length > 0 ? fallbackAnswer(results, topic) : UNCLEAR_QUESTION;
       }
     },
   };

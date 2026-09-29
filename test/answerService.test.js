@@ -37,7 +37,7 @@ test("handles short price and age questions in scholarship mode", async () => {
   assert.match(await service.answer("อายุเท่าไร"), /ทุนระดับ ม.1/);
 });
 
-test("stays silent for an out-of-scope question", async () => {
+test("gives feedback for an out-of-scope question", async () => {
   const service = createAnswerService({
     aiAnswerer: null,
     aiEnabled: false,
@@ -45,7 +45,7 @@ test("stays silent for an out-of-scope question", async () => {
     logger: silentLogger(),
     rateLimiter: allowAllLimiter(),
   });
-  assert.equal(await service.answer("เข็มขัดนักเรียนชายราคาเท่าไร"), null);
+  assert.match(await service.answer("เข็มขัดนักเรียนชายราคาเท่าไร"), /ยังไม่เข้าใจคำถาม/);
 });
 
 test("stays silent for greetings and help requests", async () => {
@@ -91,5 +91,27 @@ test("uses a grounded AI answer when available", async () => {
   const answer = await service.answer("สมัครวันไหน");
   assert.match(answer, /15 ตุลาคม/);
   assert.match(answer, /อ้างอิง:/);
+});
+
+test("lets AI classify a question when keyword retrieval finds nothing", async () => {
+  let receivedEntryCount = 0;
+  const service = createAnswerService({
+    aiAnswerer: async ({ entries }) => {
+      receivedEntryCount = entries.length;
+      return {
+        inScope: true,
+        answerThai: "เปิดรับสมัครวันที่ 15 ตุลาคม 2569 ครับ",
+        usedEntryIds: [entries.find((entry) => entry.id === "application-period").id],
+        model: "test-model",
+      };
+    },
+    aiEnabled: true,
+    knowledgeBase: loadKnowledgeBase(),
+    logger: silentLogger(),
+    rateLimiter: allowAllLimiter(),
+  });
+  const answer = await service.answer("ช่วงเวลาของการยื่นเอกสารเป็นอย่างไรครับ");
+  assert.equal(receivedEntryCount, 17);
+  assert.match(answer, /15 ตุลาคม/);
 });
 
