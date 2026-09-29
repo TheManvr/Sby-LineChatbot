@@ -21,9 +21,10 @@ function sourceIdFor(event) {
 }
 
 const ID_COMMANDS = new Set(["/my-id", "รหัสฉัน"]);
-const GENERAL_MODE_PENDING =
-  "โหมดคำถามทั่วไปยังอยู่ระหว่างการพัฒนาครับ ตอนนี้ยังไม่เปิดให้ AI ตอบคำถามทั่วไป\n\n" +
-  "หากต้องการสอบถามเรื่องทุนช้างเผือก ให้เลือกเมนู 2 หรือพิมพ์ 2 ครับ หากต้องการคุยกับแอดมิน ให้เลือกเมนู 3 หรือพิมพ์ 3 ครับ";
+const GENERAL_MODE_PROMPT =
+  "ตอนนี้คุณกำลังถามคำถามทั่วไปครับ โปรดพิมพ์ข้อความ";
+const GENERAL_MODE_DISABLED =
+  "โหมดคำถามทั่วไปยังอยู่ระหว่างการพัฒนาครับ ตอนนี้ยังไม่เปิดให้ AI ตอบคำถามทั่วไป";
 
 function textMessage(text) {
   return { type: "text", text: text.slice(0, 5000) };
@@ -59,14 +60,12 @@ function createServer({
 
   function modeConfirmation(mode) {
     if (mode === CHAT_MODES.GENERAL) {
-      return config.generalModeEnabled
-        ? "เลือกโหมดคำถามทั่วไปแล้วครับ พิมพ์คำถามเกี่ยวกับโรงเรียนได้เลยครับ"
-        : GENERAL_MODE_PENDING;
+      return GENERAL_MODE_PROMPT;
     }
     if (mode === CHAT_MODES.SCHOLARSHIP) {
-      return "เลือกโหมดทุนช้างเผือกแล้วครับ ผมจะตอบต่อเนื่องในหัวข้อนี้จนกว่าจะเลือกเมนูอื่นครับ";
+      return "ตอนนี้คุณกำลังคุยเรื่องทุนช้างเผือกครับ โปรดพิมพ์ข้อความ";
     }
-    return "เลือกโหมดติดต่อแอดมินแล้วครับ พิมพ์ข้อความที่ต้องการฝากถึงแอดมินได้เลย AI จะไม่ตอบเนื้อหานั้นครับ";
+    return "ตอนนี้คุณกำลังติดต่อแอดมินครับ โปรดพิมพ์ข้อความ";
   }
 
   async function setMode(event, mode) {
@@ -149,7 +148,7 @@ function createServer({
 
     if (currentMode === CHAT_MODES.GENERAL) {
       if (!config.generalModeEnabled || !generalAnswerer || !config.aiEnabled) {
-        await reply(event.replyToken, GENERAL_MODE_PENDING);
+        await reply(event.replyToken, GENERAL_MODE_DISABLED);
         return;
       }
       const rate = rateLimiter.check(sourceKeyFor(event));
