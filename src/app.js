@@ -21,6 +21,9 @@ function sourceIdFor(event) {
 }
 
 const ID_COMMANDS = new Set(["/my-id", "รหัสฉัน"]);
+const GENERAL_MODE_PENDING =
+  "โหมดคำถามทั่วไปยังอยู่ระหว่างการพัฒนาครับ ตอนนี้ยังไม่เปิดให้ AI ตอบคำถามทั่วไป\n\n" +
+  "หากต้องการสอบถามเรื่องทุนช้างเผือก ให้เลือกเมนู 2 หรือพิมพ์ 2 ครับ หากต้องการคุยกับแอดมิน ให้เลือกเมนู 3 หรือพิมพ์ 3 ครับ";
 
 function textMessage(text) {
   return { type: "text", text: text.slice(0, 5000) };
@@ -56,7 +59,9 @@ function createServer({
 
   function modeConfirmation(mode) {
     if (mode === CHAT_MODES.GENERAL) {
-      return "เลือกโหมดคำถามทั่วไปแล้วครับ พิมพ์คำถามเกี่ยวกับโรงเรียนได้เลยครับ";
+      return config.generalModeEnabled
+        ? "เลือกโหมดคำถามทั่วไปแล้วครับ พิมพ์คำถามเกี่ยวกับโรงเรียนได้เลยครับ"
+        : GENERAL_MODE_PENDING;
     }
     if (mode === CHAT_MODES.SCHOLARSHIP) {
       return "เลือกโหมดทุนช้างเผือกแล้วครับ ผมจะตอบต่อเนื่องในหัวข้อนี้จนกว่าจะเลือกเมนูอื่นครับ";
@@ -143,11 +148,8 @@ function createServer({
     }
 
     if (currentMode === CHAT_MODES.GENERAL) {
-      if (!generalAnswerer || !config.aiEnabled) {
-        await reply(
-          event.replyToken,
-          "โหมดคำถามทั่วไปยังไม่ได้เปิดใช้งาน AI ครับ หากต้องการข้อมูลทุนช้างเผือกให้เลือกเมนู 2"
-        );
+      if (!config.generalModeEnabled || !generalAnswerer || !config.aiEnabled) {
+        await reply(event.replyToken, GENERAL_MODE_PENDING);
         return;
       }
       const rate = rateLimiter.check(sourceKeyFor(event));
@@ -208,6 +210,9 @@ function createServer({
         requestsPerUserPerHour: config.aiEnabled
           ? config.aiRequestsPerHour
           : null,
+      },
+      generalMode: {
+        enabled: config.generalModeEnabled,
       },
       adminRelay: {
         configured: adminRelay.configured,

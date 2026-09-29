@@ -30,6 +30,7 @@ LINE_CHANNEL_ACCESS_TOKEN=ใส่ Channel access token ของ LINE Develope
 LINE_CHANNEL_SECRET=ใส่ Channel secret ของ LINE Developers
 PORT=3000
 AI_ANALYSIS_ENABLED=false
+GENERAL_MODE_ENABLED=false
 OPENAI_API_KEY=ใส่ API key เดียวกับ CyberGuardBot
 OPENAI_MODEL=gpt-5.4-nano
 AI_REQUESTS_PER_HOUR=30
@@ -38,13 +39,15 @@ ADMIN_USER_ID=LINE user ID ของแอดมิน
 
 ค่าเริ่มต้น `AI_ANALYSIS_ENABLED=false` ทำให้บอตตอบจากข้อมูลที่ตรวจทานแล้วได้ทันทีโดยไม่ต้องมี OpenAI key เมื่อกรอก `OPENAI_API_KEY` แล้วให้เปลี่ยนเป็น `AI_ANALYSIS_ENABLED=true` เพื่อเปิดการเรียบเรียงคำตอบด้วย API เดียวกับ CyberGuardBot ห้าม commit ไฟล์ `.env` หรือ secret ใด ๆ ขึ้น GitHub
 
+`GENERAL_MODE_ENABLED=false` เป็นค่าที่ตั้งไว้สำหรับโหมดคำถามทั่วไปในช่วงเริ่มต้น ระบบจะแจ้งผู้ใช้ว่าโหมดนี้ยังอยู่ระหว่างการพัฒนาและจะไม่ส่งข้อความไปหา AI หากเตรียมคลังข้อมูลคำถามทั่วไปเสร็จแล้วจึงเปลี่ยนเป็น `true`
+
 ## โหมดเมนู 3 แบบ
 
 Rich Menu ที่เตรียมไว้มี 3 ปุ่มและส่ง postback ดังนี้:
 
 | ปุ่ม | postback | การทำงาน |
 | --- | --- | --- |
-| คำถามทั่วไป | `mode=general` | เรียก AI ในบทบาทผู้ช่วยคำถามทั่วไปของโรงเรียน |
+| คำถามทั่วไป | `mode=general` | แจ้งว่ายังอยู่ระหว่างการพัฒนา (เปิด AI ได้ภายหลังด้วย `GENERAL_MODE_ENABLED=true`) |
 | ทุนช้างเผือก | `mode=scholarship` | ใช้คลังข้อมูลทุนช้างเผือกและ AI แบบ grounded |
 | ติดต่อแอดมิน | `mode=admin` | ไม่เรียก AI ส่งข้อความเป็น ticket ให้แอดมิน |
 
@@ -55,6 +58,8 @@ npm run menu:setup
 ```
 
 คำสั่งนี้ใช้ `LINE_CHANNEL_ACCESS_TOKEN` และตั้ง Rich Menu เป็นเมนูหลักของ Official Account
+
+ถ้าเคยสร้างเมนูรุ่นก่อนแล้ว ให้รันคำสั่งนี้อีกครั้งเพื่อสร้างเมนูรุ่นล่าสุดที่กดแล้วจะไม่ส่งชื่อปุ่มเป็นข้อความซ้ำ
 
 ก่อนตั้ง `ADMIN_USER_ID` ให้ผู้ดูแลส่ง `/my-id` ให้บอต แล้วนำ LINE user ID ที่ได้รับมาใส่ใน Hostinger Environment Variables จากนั้น Redeploy
 

@@ -10,6 +10,9 @@ function readConfig() {
   const aiEnabled = /^(1|true|yes)$/i.test(
     process.env.AI_ANALYSIS_ENABLED ?? "false"
   );
+  const generalModeEnabled = /^(1|true|yes)$/i.test(
+    process.env.GENERAL_MODE_ENABLED ?? "false"
+  );
   const openaiApiKey = process.env.OPENAI_API_KEY;
 
   if (!channelAccessToken || !channelSecret) {
@@ -26,6 +29,7 @@ function readConfig() {
 
   return {
     aiEnabled,
+    generalModeEnabled,
     aiRequestsPerHour: readPositiveInteger(
       process.env.AI_REQUESTS_PER_HOUR,
       30,

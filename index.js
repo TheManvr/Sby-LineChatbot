@@ -20,7 +20,7 @@ const aiAnswerer = config.aiEnabled
       model: config.openaiModel,
     })
   : null;
-const generalAnswerer = config.aiEnabled
+const generalAnswerer = config.aiEnabled && config.generalModeEnabled
   ? createGeneralAnswerer({
       apiKey: config.openaiApiKey,
       model: config.openaiModel,
