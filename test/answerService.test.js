@@ -1,10 +1,7 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
 const { loadKnowledgeBase } = require("../src/knowledge/loadKnowledgeBase");
-const {
-  SCOPE_REPLY,
-  createAnswerService,
-} = require("../src/services/answerService");
+const { createAnswerService } = require("../src/services/answerService");
 
 function silentLogger() {
   return { error() {}, info() {} };
@@ -28,7 +25,7 @@ test("answers a known question without AI", async () => {
   assert.match(answer, /อ้างอิง:/);
 });
 
-test("refuses an out-of-scope question", async () => {
+test("stays silent for an out-of-scope question", async () => {
   const service = createAnswerService({
     aiAnswerer: null,
     aiEnabled: false,
@@ -36,10 +33,19 @@ test("refuses an out-of-scope question", async () => {
     logger: silentLogger(),
     rateLimiter: allowAllLimiter(),
   });
-  assert.equal(
-    await service.answer("เข็มขัดนักเรียนชายราคาเท่าไร"),
-    SCOPE_REPLY
-  );
+  assert.equal(await service.answer("เข็มขัดนักเรียนชายราคาเท่าไร"), null);
+});
+
+test("stays silent for greetings and help requests", async () => {
+  const service = createAnswerService({
+    aiAnswerer: null,
+    aiEnabled: false,
+    knowledgeBase: loadKnowledgeBase(),
+    logger: silentLogger(),
+    rateLimiter: allowAllLimiter(),
+  });
+  assert.equal(await service.answer("สวัสดีครับ"), null);
+  assert.equal(await service.answer("ช่วยเหลือ"), null);
 });
 
 test("falls back to verified data if AI fails", async () => {

@@ -4,21 +4,6 @@ const {
   matchesTopicAlias,
 } = require("../knowledge/retriever");
 
-const SCOPE_REPLY =
-  "ตอนนี้ผมตอบข้อมูลได้เฉพาะเรื่องทุนช้างเผือก ปีการศึกษา 2570 ของโรงเรียนส่วนบุญโญปถัมภ์ ลำพูนครับ\n\nลองถาม เช่น “สมัครวันไหน”, “ค่าสมัครเท่าไร”, “สอบวิชาอะไร” หรือ “ทุนได้กี่บาท”";
-
-const HELP_REPLY =
-  "ผมช่วยตอบคำถามเรื่องทุนช้างเผือก ปีการศึกษา 2570 ได้ครับ เช่น\n" +
-  "• คุณสมบัติผู้สมัคร\n" +
-  "• วันสมัครและค่าสมัคร\n" +
-  "• วิชาสอบและตารางสอบ\n" +
-  "• จำนวนทุนและเงื่อนไข GPAX\n" +
-  "• การประกาศผลและเกียรติบัตร\n\n" +
-  "พิมพ์คำถามได้เลยครับ";
-
-const GREETING_REPLY =
-  "สวัสดีครับ ผมเป็นผู้ช่วยข้อมูลโรงเรียนส่วนบุญโญปถัมภ์ ลำพูน ตอนนี้ตอบคำถามเกี่ยวกับทุนช้างเผือก ปีการศึกษา 2570 ได้ครับ\n\nอยากทราบเรื่องคุณสมบัติ วันสมัคร ค่าสมัคร วันสอบ หรือจำนวนทุน ถามได้เลยครับ";
-
 const GREETINGS = new Set(["สวัสดี", "สวัสดีครับ", "หวัดดี", "hello", "hi"]);
 const HELP_WORDS = new Set(["ช่วยเหลือ", "help", "เมนู", "ถามอะไรได้บ้าง"]);
 
@@ -43,16 +28,19 @@ function createAnswerService({
   return {
     async answer(question, sourceKey = "anonymous") {
       const compactQuestion = compactText(question);
-      if (!compactQuestion) return HELP_REPLY;
-      if (GREETINGS.has(compactQuestion)) return GREETING_REPLY;
-      if (HELP_WORDS.has(compactQuestion)) return HELP_REPLY;
+      // Return null for anything outside the current scholarship topic. The
+      // webhook deliberately does not reply so a school administrator can
+      // answer general questions manually.
+      if (!compactQuestion) return null;
+      if (GREETINGS.has(compactQuestion)) return null;
+      if (HELP_WORDS.has(compactQuestion)) return null;
 
       let results = findRelevantEntries(question, knowledgeBase, { limit: 4 });
       const hasTopicAlias = matchesTopicAlias(question, knowledgeBase);
       if (results.length === 0 && hasTopicAlias) {
         results = [{ entry: topic.entries[0], score: 1 }];
       }
-      if (results.length === 0) return SCOPE_REPLY;
+      if (results.length === 0) return null;
 
       if (!aiEnabled || !aiAnswerer) {
         return fallbackAnswer(results, topic);
@@ -70,7 +58,7 @@ function createAnswerService({
           question,
           topicTitle: topic.title,
         });
-        if (!aiResult.inScope) return SCOPE_REPLY;
+        if (!aiResult.inScope) return null;
         logger.info("ai_answer_created", {
           entryCount: aiResult.usedEntryIds.length,
           model: aiResult.model,
@@ -87,9 +75,6 @@ function createAnswerService({
 }
 
 module.exports = {
-  GREETING_REPLY,
-  HELP_REPLY,
-  SCOPE_REPLY,
   createAnswerService,
 };
 

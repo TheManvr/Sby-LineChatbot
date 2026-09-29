@@ -32,20 +32,14 @@ function createServer({ answerService, config, knowledgeBase, logger }) {
     const startedAt = Date.now();
 
     if (event.type === "follow") {
-      await reply(
-        event.replyToken,
-        "สวัสดีครับ ตอนนี้ผมช่วยตอบคำถามเกี่ยวกับทุนช้างเผือก ปีการศึกษา 2570 ของโรงเรียนส่วนบุญโญปถัมภ์ ลำพูนได้ครับ\n\nลองถามว่า “สมัครวันไหน” หรือ “ทุนได้กี่บาท” ได้เลยครับ"
-      );
+      logger.info("follow_ignored");
       return;
     }
 
     if (event.type !== "message") return;
 
     if (event.message.type !== "text") {
-      await reply(
-        event.replyToken,
-        "ตอนนี้ผมอ่านข้อความได้เท่านั้น และตอบเฉพาะเรื่องทุนช้างเผือก ปีการศึกษา 2570 ครับ"
-      );
+      logger.info("message_ignored", { reason: "non_text" });
       return;
     }
 
@@ -53,6 +47,10 @@ function createServer({ answerService, config, knowledgeBase, logger }) {
       event.message.text,
       sourceKeyFor(event)
     );
+    if (answer == null) {
+      logger.info("message_ignored", { reason: "out_of_scope" });
+      return;
+    }
     await reply(event.replyToken, answer);
     logger.info("message_processed", {
       durationMs: Date.now() - startedAt,
