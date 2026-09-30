@@ -2,6 +2,7 @@ const crypto = require("node:crypto");
 const express = require("express");
 const line = require("@line/bot-sdk");
 const { version } = require("../package.json");
+const { createConversationStore } = require("./conversationStore");
 const { createAdminRelay } = require("./services/adminRelay");
 const {
   CHAT_MODES,
@@ -33,6 +34,7 @@ function textMessage(text) {
 function createServer({
   answerService,
   config,
+  conversationStore = createConversationStore(),
   generalAnswerer,
   knowledgeBase,
   logger,
@@ -103,7 +105,9 @@ function createServer({
     const eventTimestamp = Number.isFinite(event.timestamp)
       ? event.timestamp
       : Date.now();
-    modeStore.set(sourceKeyFor(event), mode, eventTimestamp);
+    const userKey = sourceKeyFor(event);
+    modeStore.set(userKey, mode, eventTimestamp);
+    conversationStore.clearUser(userKey);
     await replyModePrompt(event, modeConfirmation(mode));
   }
 
@@ -191,17 +195,27 @@ function createServer({
         return;
       }
       try {
+        const userKey = sourceKeyFor(event);
+        const history = conversationStore.get(userKey, CHAT_MODES.GENERAL);
         const generalEntries = knowledgeBase.entries.filter(
           (entry) => entry.topicId !== knowledgeBase.topics[0]?.id
         );
         const result = await generalAnswerer({
           question: text,
           sourceEntries: generalEntries,
+          history,
         });
         if (result.switchToScholarship) {
-          await reply(event.replyToken, "คำถามนี้เกี่ยวกับทุนช้างเผือกครับ กรุณาเลือกเมนู 2");
+          const response = "คำถามนี้เกี่ยวกับทุนช้างเผือกครับ กรุณาเลือกเมนู 2";
+          await reply(event.replyToken, response);
+          conversationStore.append(userKey, CHAT_MODES.GENERAL, text, response);
         } else if (result.shouldReply && result.answerThai.trim()) {
           await reply(event.replyToken, result.answerThai);
+          conversationStore.append(userKey, CHAT_MODES.GENERAL, text, result.answerThai);
+        } else {
+          const response = "🤔 ขออภัยครับ ผมยังช่วยตอบข้อความนี้ไม่ได้ในโหมดคำถามทั่วไป ลองถามใหม่อีกครั้งหรือเลือกติดต่อแอดมินได้ครับ";
+          await reply(event.replyToken, response);
+          conversationStore.append(userKey, CHAT_MODES.GENERAL, text, response);
         }
       } catch (error) {
         logger.error("general_ai_failed", {
@@ -212,15 +226,15 @@ function createServer({
       return;
     }
 
-    const answer = await answerService.answer(
-      text,
-      sourceKeyFor(event)
-    );
+    const userKey = sourceKeyFor(event);
+    const history = conversationStore.get(userKey, CHAT_MODES.SCHOLARSHIP);
+    const answer = await answerService.answer(text, userKey, history);
     if (answer == null) {
       logger.info("message_ignored", { reason: "out_of_scope" });
       return;
     }
     await reply(event.replyToken, answer);
+    conversationStore.append(userKey, CHAT_MODES.SCHOLARSHIP, text, answer);
     logger.info("message_processed", {
       durationMs: Date.now() - startedAt,
       messageType: event.message.type,

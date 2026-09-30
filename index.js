@@ -2,6 +2,7 @@ const path = require("node:path");
 require("dotenv").config({ quiet: true });
 
 const { createServer } = require("./src/app");
+const { createConversationStore } = require("./src/conversationStore");
 const { readConfig } = require("./src/config");
 const { loadKnowledgeBase } = require("./src/knowledge/loadKnowledgeBase");
 const { createLogger } = require("./src/logger");
@@ -32,6 +33,7 @@ const modeStore = createModeStore({
     process.env.MODE_STORE_PATH ||
     path.join(process.cwd(), ".runtime", "modes.json"),
 });
+const conversationStore = createConversationStore();
 const answerService = createAnswerService({
   aiAnswerer,
   aiEnabled: config.aiEnabled,
@@ -42,6 +44,7 @@ const answerService = createAnswerService({
 const { server } = createServer({
   answerService,
   config,
+  conversationStore,
   generalAnswerer,
   knowledgeBase,
   logger,
